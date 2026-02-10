@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste de Nivelamento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:Arial;background:#eef2f5;margin:0}
+header{background:#1f3c88;color:white;padding:20px;text-align:center}
+.container{max-width:900px;margin:auto;padding:20px}
+.section{background:white;padding:20px;margin-bottom:20px;border-radius:8px}
+button{padding:12px 20px;background:#27ae60;color:white;border:none;border-radius:5px;font-size:16px}
+.certo{color:green} .errado{color:red}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Teste de Nivelamento</h1>
+<p>9º Ano — Inglês e Matemática</p>
+</header>
+
+<div class="container">
+<div class="section">
+Nome da aluna: <input type="text" id="nome" style="width:100%;padding:8px;">
+</div>
+
+<!-- INGLÊS -->
+<div class="section">
+<h2>🇬🇧 Inglês</h2>
+<b>Grammar</b><br>
+1) She ___ to school every day.<br>
+<input type="radio" name="g1" value="1"> goes
+<input type="radio" name="g1" value="0"> go<br><br>
+
+2) They ___ playing now.<br>
+<input type="radio" name="g2" value="1"> are
+<input type="radio" name="g2" value="0"> is<br><br>
+
+3) He ___ breakfast at 7am.<br>
+<input type="radio" name="g3" value="1"> eats
+<input type="radio" name="g3" value="0"> eat<br><br>
+
+4) There ___ a book on the table.<br>
+<input type="radio" name="g4" value="1"> is
+<input type="radio" name="g4" value="0"> are<br><br>
+
+<b>Vocabulary</b><br>
+5) Beautiful =<br>
+<input type="radio" name="v1" value="1"> bonito
+<input type="radio" name="v1" value="0"> rápido<br><br>
+
+6) Quickly is a:<br>
+<input type="radio" name="v2" value="1"> adverb
+<input type="radio" name="v2" value="0"> noun<br><br>
+
+7) Teacher means:<br>
+<input type="radio" name="v3" value="1"> professor
+<input type="radio" name="v3" value="0"> estudante<br><br>
+
+<b>Reading</b><br>
+"Anna studies at night."<br>
+8) When does she study?<br>
+<input type="radio" name="r1" value="1"> At night
+<input type="radio" name="r1" value="0"> Morning<br><br>
+
+"Tom has two dogs."<br>
+9) How many dogs?<br>
+<input type="radio" name="r2" value="1"> Two
+<input type="radio" name="r2" value="0"> One<br><br>
+
+"Mary likes apples."<br>
+10) What does she like?<br>
+<input type="radio" name="r3" value="1"> Apples
+<input type="radio" name="r3" value="0"> Bananas<br><br>
+</div>
+
+<!-- MATEMÁTICA -->
+<div class="section">
+<h2>📐 Matemática</h2>
+<b>Álgebra</b><br>
+1) 2x + 6 = 14<br>
+<input type="radio" name="a1" value="1"> 4
+<input type="radio" name="a1" value="0"> 3<br><br>
+
+2) 3x = 21<br>
+<input type="radio" name="a2" value="1"> 7
+<input type="radio" name="a2" value="0"> 6<br><br>
+
+3) x - 5 = 9<br>
+<input type="radio" name="a3" value="1"> 14
+<input type="radio" name="a3" value="0"> 4<br><br>
+
+4) 5x = 25<br>
+<input type="radio" name="a4" value="1"> 5
+<input type="radio" name="a4" value="0"> 10<br><br>
+
+<b>Aritmética</b><br>
+5) 30% de 200<br>
+<input type="radio" name="ar1" value="1"> 60
+<input type="radio" name="ar1" value="0"> 30<br><br>
+
+6) √81<br>
+<input type="radio" name="ar2" value="1"> 9
+<input type="radio" name="ar2" value="0"> 8<br><br>
+
+7) 15 + 27<br>
+<input type="radio" name="ar3" value="1"> 42
+<input type="radio" name="ar3" value="0"> 40<br><br>
+
+<b>Geometria</b><br>
+8) Área quadrado lado 5<br>
+<input type="radio" name="geo1" value="1"> 25
+<input type="radio" name="geo1" value="0"> 20<br><br>
+
+9) Soma ângulos triângulo<br>
+<input type="radio" name="geo2" value="1"> 180°
+<input type="radio" name="geo2" value="0"> 360°<br><br>
+
+10) Perímetro quadrado lado 4<br>
+<input type="radio" name="geo3" value="1"> 16
+<input type="radio" name="geo3" value="0"> 8<br><br>
+</div>
+
+<button onclick="corrigir()">Finalizar e Gerar Relatório</button>
+<div id="resultado" class="section" style="display:none"></div>
+<canvas id="grafico" width="400" height="200"></canvas>
+
+<script>
+const gabarito={"g1":"1","g2":"1","g3":"1","g4":"1","v1":"1","v2":"1","v3":"1","r1":"1","r2":"1","r3":"1","a1":"1","a2":"1","a3":"1","a4":"1","ar1":"1","ar2":"1","ar3":"1","geo1":"1","geo2":"1","geo3":"1"};
+
+function nivel(p,max){let r=p/max;if(r<0.4)return"Inic.";if(r<0.7)return"Básico";return"Adeq.";}
+
+function corrigir(){
+const {jsPDF}=window.jspdf;let doc=new jsPDF();
+let nome=document.getElementById("nome").value||"Aluna";
+let pontos={grammar:0,vocab:0,read:0,alg:0,ari:0,geo:0};
+let max={grammar:4,vocab:3,read:3,alg:4,ari:3,geo:3};
+let html="<h2>Correção detalhada</h2>";let yPDF=40;
+
+for(let q in gabarito){
+let marcado=document.querySelector(`input[name="${q}"]:checked`);
+let certo=gabarito[q];let acertou=marcado && marcado.value===certo;
+
+if(q.startsWith("g"))pontos.grammar+=acertou?1:0;
+if(q.startsWith("v"))pontos.vocab+=acertou?1:0;
+if(q.startsWith("r"))pontos.read+=acertou?1:0;
+if(q.startsWith("a")&&!q.startsWith("ar"))pontos.alg+=acertou?1:0;
+if(q.startsWith("ar"))pontos.ari+=acertou?1:0;
+if(q.startsWith("geo"))pontos.geo+=acertou?1:0;
+
+html+=`<p class="${acertou?'certo':'errado'}">${acertou?'✔':'✘'} ${q} ${acertou?'':'(Correta: opção 1)'}</p>`;
+doc.text(`${acertou?'OK':'ERRO'} - ${q}`,20,yPDF);yPDF+=8;
+if(yPDF>270){doc.addPage();yPDF=20;}
+}
+
+document.getElementById("resultado").innerHTML=html;
+document.getElementById("resultado").style.display="block";
+
+let dados=[pontos.grammar,pontos.vocab,pontos.read,pontos.alg,pontos.ari,pontos.geo];
+new Chart(document.getElementById('grafico'),{type:'bar',data:{labels:['Grammar','Vocabulary','Reading','Álgebra','Aritmética','Geometria'],datasets:[{data:dados}]},options:{scales:{y:{beginAtZero:true,max:4}}}});
+
+setTimeout(()=>{
+let img=document.getElementById('grafico').toDataURL();
+doc.text("Relatório de Nivelamento",20,20);
+doc.text("Nome: "+nome,20,30);
+doc.text(`Grammar: ${nivel(pontos.grammar,max.grammar)}`,120,40);
+doc.text(`Vocabulary: ${nivel(pontos.vocab,max.vocab)}`,120,50);
+doc.text(`Reading: ${nivel(pontos.read,max.read)}`,120,60);
+doc.text(`Álgebra: ${nivel(pontos.alg,max.alg)}`,120,70);
+doc.text(`Aritmética: ${nivel(pontos.ari,max.ari)}`,120,80);
+doc.text(`Geometria: ${nivel(pontos.geo,max.geo)}`,120,90);
+doc.addImage(img,'PNG',15,110,180,80);
+doc.save("resultado_detalhado.pdf");
+},800);
+}
+</script>
+
+</body>
+</html>
